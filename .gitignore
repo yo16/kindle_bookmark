@@ -151,3 +151,7 @@ main.js
 
 # Sample files (for development only)
 sample_file/
+
+# Test scripts (temporary)
+test-*.js
+**/test-*.js
