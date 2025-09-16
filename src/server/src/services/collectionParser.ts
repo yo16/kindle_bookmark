@@ -14,10 +14,10 @@ import { ASIN, validateAsin } from '../models/book.js';
 
 // CLAUDE.mdのパフォーマンス目標値に従う
 const PERFORMANCE_TARGETS = {
-  STARTUP_TIME: 3000,    // 起動時間: 3秒以内
-  SEARCH_TIME: 100,      // 検索: 100ms以内
-  VIEW_SWITCH: 500,      // 表示切替: 500ms以内
-  SYNC_TIME: 5000        // 同期: 5秒以内（1000冊）
+  STARTUP_TIME: 3000, // 起動時間: 3秒以内
+  SEARCH_TIME: 100, // 検索: 100ms以内
+  VIEW_SWITCH: 500, // 表示切替: 500ms以内
+  SYNC_TIME: 5000, // 同期: 5秒以内（1000冊）
 } as const;
 
 // CLAUDE.mdのエラー定義に従う
@@ -27,16 +27,19 @@ const KINDLE_ERRORS = {
   APP_NOT_FOUND: 'Kindleアプリが見つかりません',
   DB_INVALID: 'データベースファイルの形式が無効です',
   SECURITY_ERROR: 'セキュリティ違反: 不正なファイルパスです',
-  DB_LOCKED: 'データベースファイルがロックされています'
+  DB_LOCKED: 'データベースファイルがロックされています',
 } as const;
 
 // ログ出力（CLAUDE.mdのパターンに従う）
 type LogFunction = (message: string) => void;
 
 const logger: Record<'info' | 'warn' | 'error', LogFunction> = {
-  info: (message: string): void => console.log(`[INFO] ${new Date().toISOString()} - ${message}`),
-  warn: (message: string): void => console.warn(`[WARN] ${new Date().toISOString()} - ${message}`),
-  error: (message: string): void => console.error(`[ERROR] ${new Date().toISOString()} - ${message}`)
+  info: (message: string): void =>
+    console.log(`[INFO] ${new Date().toISOString()} - ${message}`),
+  warn: (message: string): void =>
+    console.warn(`[WARN] ${new Date().toISOString()} - ${message}`),
+  error: (message: string): void =>
+    console.error(`[ERROR] ${new Date().toISOString()} - ${message}`),
 };
 
 /**
@@ -113,12 +116,23 @@ export class KindleCollectionParser {
   constructor() {
     // Windows環境のKindleキャッシュディレクトリパス
     if (!process.env.USERPROFILE) {
-      throw new Error('Windows環境でのみ動作します: USERPROFILE環境変数が見つかりません');
+      throw new Error(
+        'Windows環境でのみ動作します: USERPROFILE環境変数が見つかりません'
+      );
     }
 
-    this.EXPECTED_KINDLE_CACHE_DIR = path.join(process.env.USERPROFILE, 'AppData', 'Local', 'Amazon', 'Kindle', 'Cache');
+    this.EXPECTED_KINDLE_CACHE_DIR = path.join(
+      process.env.USERPROFILE,
+      'AppData',
+      'Local',
+      'Amazon',
+      'Kindle',
+      'Cache'
+    );
 
-    logger.info(`Kindle コレクションパーサーを初期化しました: ${this.EXPECTED_KINDLE_CACHE_DIR}`);
+    logger.info(
+      `Kindle コレクションパーサーを初期化しました: ${this.EXPECTED_KINDLE_CACHE_DIR}`
+    );
   }
 
   /**
@@ -157,33 +171,39 @@ export class KindleCollectionParser {
           totalAssociations: associations.length,
           errorCount: 0,
           processingTimeMs: processingTime,
-          fileSizeBytes: stats.size
+          fileSizeBytes: stats.size,
         };
 
         // パフォーマンス目標チェック
         if (processingTime > PERFORMANCE_TARGETS.SYNC_TIME) {
-          logger.warn(`パフォーマンス目標を超過しました: ${processingTime}ms > ${PERFORMANCE_TARGETS.SYNC_TIME}ms`);
+          logger.warn(
+            `パフォーマンス目標を超過しました: ${processingTime}ms > ${PERFORMANCE_TARGETS.SYNC_TIME}ms`
+          );
         }
 
-        logger.info(`SQLiteデータベースの解析が完了しました: ${collections.length}個のコレクション、${associations.length}個の関連付けを処理（${processingTime}ms）`);
+        logger.info(
+          `SQLiteデータベースの解析が完了しました: ${collections.length}個のコレクション、${associations.length}個の関連付けを処理（${processingTime}ms）`
+        );
 
         return {
           collections,
           associations,
-          statistics
+          statistics,
         };
-
       } finally {
         // データベース接続をクローズ
         if (db) {
           await this.closeDatabase(db);
         }
       }
-
     } catch (error) {
-      logger.error(`SQLiteデータベースの解析に失敗しました: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `SQLiteデータベースの解析に失敗しました: ${error instanceof Error ? error.message : String(error)}`
+      );
 
-      const dbError = new Error(`${KINDLE_ERRORS.PARSE_ERROR}: ${error instanceof Error ? error.message : String(error)}`);
+      const dbError = new Error(
+        `${KINDLE_ERRORS.PARSE_ERROR}: ${error instanceof Error ? error.message : String(error)}`
+      );
       throw dbError;
     }
   }
@@ -202,7 +222,7 @@ export class KindleCollectionParser {
     // Windows環境でのパス比較（大文字小文字を無視）
     const normalizedPath = path.normalize(dbPath).toLowerCase();
     const expectedDir = this.EXPECTED_KINDLE_CACHE_DIR.toLowerCase();
-    
+
     if (!normalizedPath.startsWith(expectedDir)) {
       logger.error(`セキュリティ違反: 不正なファイルパス: ${dbPath}`);
       throw new Error(KINDLE_ERRORS.SECURITY_ERROR);
@@ -223,7 +243,9 @@ export class KindleCollectionParser {
 
       // ファイルサイズ制限チェック
       if (stats.size > this.MAX_FILE_SIZE) {
-        throw new Error(`データベースファイルが大きすぎます: ${stats.size} bytes > ${this.MAX_FILE_SIZE} bytes`);
+        throw new Error(
+          `データベースファイルが大きすぎます: ${stats.size} bytes > ${this.MAX_FILE_SIZE} bytes`
+        );
       }
 
       // 空ファイルチェック
@@ -232,9 +254,8 @@ export class KindleCollectionParser {
       }
 
       return stats;
-
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as { code?: string }).code === 'ENOENT') {
         throw new Error(KINDLE_ERRORS.FILES_NOT_FOUND);
       }
       throw error;
@@ -249,31 +270,27 @@ export class KindleCollectionParser {
   private async connectDatabase(dbPath: string): Promise<sqlite3.Database> {
     return new Promise((resolve, reject) => {
       // 読み取り専用モードで開く（重要：Kindleファイルの破損を防ぐ）
-      const db = new sqlite3.Database(
-        dbPath,
-        sqlite3.OPEN_READONLY,
-        (err) => {
-          if (err) {
-            logger.error(`データベース接続エラー: ${err.message}`);
+      const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
+        if (err) {
+          logger.error(`データベース接続エラー: ${err.message}`);
 
-            // エラー種別の判定
-            if (err.message.includes('locked')) {
-              reject(new Error(KINDLE_ERRORS.DB_LOCKED));
-            } else if (err.message.includes('not a database')) {
-              reject(new Error(KINDLE_ERRORS.DB_INVALID));
-            } else {
-              reject(err);
-            }
+          // エラー種別の判定
+          if (err.message.includes('locked')) {
+            reject(new Error(KINDLE_ERRORS.DB_LOCKED));
+          } else if (err.message.includes('not a database')) {
+            reject(new Error(KINDLE_ERRORS.DB_INVALID));
           } else {
-            logger.info('SQLiteデータベースに接続しました（読み取り専用モード）');
-
-            // バスyタイムアウト設定
-            db.configure('busyTimeout', this.DB_TIMEOUT);
-
-            resolve(db);
+            reject(err);
           }
+        } else {
+          logger.info('SQLiteデータベースに接続しました（読み取り専用モード）');
+
+          // バスyタイムアウト設定
+          db.configure('busyTimeout', this.DB_TIMEOUT);
+
+          resolve(db);
         }
-      );
+      });
     });
   }
 
@@ -297,7 +314,9 @@ export class KindleCollectionParser {
   /**
    * コレクション情報の取得
    */
-  private async fetchCollections(db: sqlite3.Database): Promise<KindleCollection[]> {
+  private async fetchCollections(
+    db: sqlite3.Database
+  ): Promise<KindleCollection[]> {
     return new Promise((resolve, reject) => {
       const collections: KindleCollection[] = [];
 
@@ -317,7 +336,9 @@ export class KindleCollectionParser {
         if (err) {
           // テーブルが存在しない場合の処理
           if (err.message.includes('no such table')) {
-            logger.warn('Collectionsテーブルが見つかりません。代替クエリを試行します。');
+            logger.warn(
+              'Collectionsテーブルが見つかりません。代替クエリを試行します。'
+            );
 
             // 代替クエリ（テーブル名が異なる可能性）
             const altQuery = `
@@ -330,7 +351,9 @@ export class KindleCollectionParser {
               if (altErr) {
                 reject(altErr);
               } else {
-                logger.info(`利用可能なテーブル: ${tables.map(t => t.name).join(', ')}`);
+                logger.info(
+                  `利用可能なテーブル: ${tables.map((t) => t.name).join(', ')}`
+                );
                 // 空の配列を返して処理を継続
                 resolve([]);
               }
@@ -346,14 +369,16 @@ export class KindleCollectionParser {
                 id: row.id || '',
                 name: row.name || '名称未設定',
                 bookCount: 0, // 後で関連付けから計算
-                lastUpdated: row.lastUpdated
+                lastUpdated: row.lastUpdated,
               };
 
               if (collection.id) {
                 collections.push(collection);
               }
             } catch (parseError) {
-              logger.warn(`コレクションデータの処理をスキップしました: ${parseError}`);
+              logger.warn(
+                `コレクションデータの処理をスキップしました: ${parseError}`
+              );
             }
           }
 
@@ -367,7 +392,9 @@ export class KindleCollectionParser {
   /**
    * 書籍とコレクションの関連付け情報の取得
    */
-  private async fetchAssociations(db: sqlite3.Database): Promise<CollectionBookAssociation[]> {
+  private async fetchAssociations(
+    db: sqlite3.Database
+  ): Promise<CollectionBookAssociation[]> {
     return new Promise((resolve, reject) => {
       const associations: CollectionBookAssociation[] = [];
 
@@ -385,7 +412,9 @@ export class KindleCollectionParser {
         if (err) {
           // テーブルが存在しない場合の処理
           if (err.message.includes('no such table')) {
-            logger.warn('Collection_Item_Associationテーブルが見つかりません。');
+            logger.warn(
+              'Collection_Item_Associationテーブルが見つかりません。'
+            );
             // 空の配列を返して処理を継続
             resolve([]);
           } else {
@@ -407,7 +436,7 @@ export class KindleCollectionParser {
                 if (asin && this.isValidAsinFormat(asin)) {
                   const association: CollectionBookAssociation = {
                     collectionId: row.collectionId || '',
-                    bookAsin: asin as ASIN
+                    bookAsin: asin as ASIN,
                   };
 
                   if (association.collectionId) {
@@ -415,17 +444,23 @@ export class KindleCollectionParser {
                   }
                 }
               } catch (parseError) {
-                logger.warn(`関連付けデータの処理をスキップしました: ${parseError}`);
+                logger.warn(
+                  `関連付けデータの処理をスキップしました: ${parseError}`
+                );
               }
             }
 
             // 大量処理の場合の進捗ログ
             if (rowsToProcess.length > 1000 && (i + CHUNK_SIZE) % 500 === 0) {
-              logger.info(`処理進捗: ${Math.min(i + CHUNK_SIZE, rowsToProcess.length)}/${rowsToProcess.length}件の関連付け`);
+              logger.info(
+                `処理進捗: ${Math.min(i + CHUNK_SIZE, rowsToProcess.length)}/${rowsToProcess.length}件の関連付け`
+              );
             }
           }
 
-          logger.info(`${associations.length}個の書籍・コレクション関連付けを取得しました`);
+          logger.info(
+            `${associations.length}個の書籍・コレクション関連付けを取得しました`
+          );
           resolve(associations);
         }
       });
@@ -446,7 +481,10 @@ export class KindleCollectionParser {
   /**
    * コレクションごとの書籍数を計算して更新
    */
-  updateBookCounts(collections: KindleCollection[], associations: CollectionBookAssociation[]): void {
+  updateBookCounts(
+    collections: KindleCollection[],
+    associations: CollectionBookAssociation[]
+  ): void {
     // コレクションIDごとの書籍数をカウント
     const bookCountMap = new Map<string, number>();
 
@@ -467,7 +505,11 @@ export class KindleCollectionParser {
    * デフォルトのデータベースパスを取得
    */
   getDefaultDBPath(): string {
-    return path.join(this.EXPECTED_KINDLE_CACHE_DIR, 'db', 'synced_collections.db');
+    return path.join(
+      this.EXPECTED_KINDLE_CACHE_DIR,
+      'db',
+      'synced_collections.db'
+    );
   }
 
   /**
@@ -484,7 +526,10 @@ export class KindleCollectionParser {
       logger.warn('デフォルトパスにデータベースが見つかりません');
 
       // 代替パスの探索
-      const altPath = path.join(this.EXPECTED_KINDLE_CACHE_DIR, 'synced_collections.db');
+      const altPath = path.join(
+        this.EXPECTED_KINDLE_CACHE_DIR,
+        'synced_collections.db'
+      );
       try {
         await fs.access(altPath);
         logger.info(`代替パスでデータベースを検出: ${altPath}`);

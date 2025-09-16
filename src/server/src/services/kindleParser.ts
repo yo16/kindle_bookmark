@@ -18,15 +18,15 @@ import {
   AuthorElement,
   XMLParseError,
   ParseStatistics,
-  BookOriginType
+  BookOriginType,
 } from '../models/book.js';
 
 // CLAUDE.mdのパフォーマンス目標値に従う
 const PERFORMANCE_TARGETS = {
-  STARTUP_TIME: 3000,    // 起動時間: 3秒以内
-  SEARCH_TIME: 100,      // 検索: 100ms以内
-  VIEW_SWITCH: 500,      // 表示切替: 500ms以内
-  SYNC_TIME: 5000        // 同期: 5秒以内（1000冊）
+  STARTUP_TIME: 3000, // 起動時間: 3秒以内
+  SEARCH_TIME: 100, // 検索: 100ms以内
+  VIEW_SWITCH: 500, // 表示切替: 500ms以内
+  SYNC_TIME: 5000, // 同期: 5秒以内（1000冊）
 } as const;
 
 // CLAUDE.mdのエラー定義に従う
@@ -35,16 +35,19 @@ const KINDLE_ERRORS = {
   PARSE_ERROR: 'ファイルの解析に失敗しました',
   APP_NOT_FOUND: 'Kindleアプリが見つかりません',
   XML_INVALID: 'XMLファイルの形式が無効です',
-  SECURITY_ERROR: 'セキュリティ違反: 不正なファイルパスです'
+  SECURITY_ERROR: 'セキュリティ違反: 不正なファイルパスです',
 } as const;
 
 // ログ出力（CLAUDE.mdのパターンに従う）
 type LogFunction = (message: string) => void;
 
 const logger: Record<'info' | 'warn' | 'error', LogFunction> = {
-  info: (message: string): void => console.log(`[INFO] ${new Date().toISOString()} - ${message}`),
-  warn: (message: string): void => console.warn(`[WARN] ${new Date().toISOString()} - ${message}`),
-  error: (message: string): void => console.error(`[ERROR] ${new Date().toISOString()} - ${message}`)
+  info: (message: string): void =>
+    console.log(`[INFO] ${new Date().toISOString()} - ${message}`),
+  warn: (message: string): void =>
+    console.warn(`[WARN] ${new Date().toISOString()} - ${message}`),
+  error: (message: string): void =>
+    console.error(`[ERROR] ${new Date().toISOString()} - ${message}`),
 };
 
 /**
@@ -58,14 +61,25 @@ export class KindleXMLParser {
   constructor() {
     // Windows環境のKindleキャッシュディレクトリパス
     if (!process.env.USERPROFILE) {
-      throw new Error('Windows環境でのみ動作します: USERPROFILE環境変数が見つかりません');
+      throw new Error(
+        'Windows環境でのみ動作します: USERPROFILE環境変数が見つかりません'
+      );
     }
 
     this.EXPECTED_KINDLE_CACHE_DIR = path.resolve(
-      path.join(process.env.USERPROFILE, 'AppData', 'Local', 'Amazon', 'Kindle', 'Cache')
+      path.join(
+        process.env.USERPROFILE,
+        'AppData',
+        'Local',
+        'Amazon',
+        'Kindle',
+        'Cache'
+      )
     );
 
-    logger.info(`Kindle XMLパーサーを初期化しました: ${this.EXPECTED_KINDLE_CACHE_DIR}`);
+    logger.info(
+      `Kindle XMLパーサーを初期化しました: ${this.EXPECTED_KINDLE_CACHE_DIR}`
+    );
   }
 
   /**
@@ -73,7 +87,9 @@ export class KindleXMLParser {
    * @param xmlPath XMLファイルのパス
    * @returns 書籍メタデータ配列と統計情報
    */
-  async parseXMLFile(xmlPath: string): Promise<{ books: BookMetadata[]; statistics: ParseStatistics }> {
+  async parseXMLFile(
+    xmlPath: string
+  ): Promise<{ books: BookMetadata[]; statistics: ParseStatistics }> {
     const startTime = Date.now();
     logger.info(`XMLファイルの解析を開始します: ${xmlPath}`);
 
@@ -85,7 +101,10 @@ export class KindleXMLParser {
       const stats = await this.validateFileAccess(xmlPath);
 
       // XMLファイル読み込み（読み取り専用・UTF-8エンコーディング明示）
-      const xmlData = await fs.readFile(xmlPath, { encoding: 'utf8', flag: 'r' });
+      const xmlData = await fs.readFile(xmlPath, {
+        encoding: 'utf8',
+        flag: 'r',
+      });
 
       // XML解析
       const parsedXML = await this.parseXMLString(xmlData);
@@ -101,21 +120,28 @@ export class KindleXMLParser {
         successCount: books.length,
         errorCount: 0,
         processingTimeMs: processingTime,
-        fileSizeBytes: stats.size
+        fileSizeBytes: stats.size,
       };
 
       // パフォーマンス目標チェック
       if (processingTime > PERFORMANCE_TARGETS.SYNC_TIME) {
-        logger.warn(`パフォーマンス目標を超過しました: ${processingTime}ms > ${PERFORMANCE_TARGETS.SYNC_TIME}ms`);
+        logger.warn(
+          `パフォーマンス目標を超過しました: ${processingTime}ms > ${PERFORMANCE_TARGETS.SYNC_TIME}ms`
+        );
       }
 
-      logger.info(`XMLファイルの解析が完了しました: ${books.length}冊の書籍を処理（${processingTime}ms）`);
+      logger.info(
+        `XMLファイルの解析が完了しました: ${books.length}冊の書籍を処理（${processingTime}ms）`
+      );
       return { books, statistics };
-
     } catch (error) {
-      logger.error(`XMLファイルの解析に失敗しました: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `XMLファイルの解析に失敗しました: ${error instanceof Error ? error.message : String(error)}`
+      );
 
-      const xmlError: XMLParseError = new Error(`${KINDLE_ERRORS.PARSE_ERROR}: ${error instanceof Error ? error.message : String(error)}`) as XMLParseError;
+      const xmlError: XMLParseError = new Error(
+        `${KINDLE_ERRORS.PARSE_ERROR}: ${error instanceof Error ? error.message : String(error)}`
+      ) as XMLParseError;
       xmlError.code = 'XML_PARSE_ERROR';
       xmlError.filePath = xmlPath;
       throw xmlError;
@@ -155,7 +181,9 @@ export class KindleXMLParser {
 
       // ファイルサイズ制限チェック
       if (stats.size > this.MAX_FILE_SIZE) {
-        throw new Error(`XMLファイルが大きすぎます: ${stats.size} bytes > ${this.MAX_FILE_SIZE} bytes`);
+        throw new Error(
+          `XMLファイルが大きすぎます: ${stats.size} bytes > ${this.MAX_FILE_SIZE} bytes`
+        );
       }
 
       // 空ファイルチェック
@@ -164,9 +192,8 @@ export class KindleXMLParser {
       }
 
       return stats;
-
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as { code?: string }).code === 'ENOENT') {
         throw new Error(KINDLE_ERRORS.FILES_NOT_FOUND);
       }
       throw error;
@@ -178,16 +205,18 @@ export class KindleXMLParser {
    */
   private async parseXMLString(xmlData: string): Promise<KindleXMLStructure> {
     const parser = new xml2js.Parser({
-      explicitArray: false,    // 単一要素も配列化しない
-      mergeAttrs: true,        // 属性をマージ
-      trim: true,              // 余白削除
-      normalize: false,        // タグ名正規化（大文字小文字保持）
-      attrValueProcessors: [   // 属性値の処理
-        (value: string) => value.trim()
+      explicitArray: false, // 単一要素も配列化しない
+      mergeAttrs: true, // 属性をマージ
+      trim: true, // 余白削除
+      normalize: false, // タグ名正規化（大文字小文字保持）
+      attrValueProcessors: [
+        // 属性値の処理
+        (value: string) => value.trim(),
       ],
-      valueProcessors: [       // テキスト値の処理
-        (value: string) => value.trim()
-      ]
+      valueProcessors: [
+        // テキスト値の処理
+        (value: string) => value.trim(),
+      ],
     });
 
     try {
@@ -199,9 +228,10 @@ export class KindleXMLParser {
       }
 
       return result as KindleXMLStructure;
-
     } catch (error) {
-      const xmlError: XMLParseError = new Error(`XML解析エラー: ${error instanceof Error ? error.message : String(error)}`) as XMLParseError;
+      const xmlError: XMLParseError = new Error(
+        `XML解析エラー: ${error instanceof Error ? error.message : String(error)}`
+      ) as XMLParseError;
       xmlError.code = 'XML_STRUCTURE_ERROR';
       throw xmlError;
     }
@@ -212,7 +242,7 @@ export class KindleXMLParser {
    */
   private extractBookMetadata(parsedXML: KindleXMLStructure): BookMetadata[] {
     const books: BookMetadata[] = [];
-    let errorCount = 0;
+    const errorCount = 0;
 
     try {
       // XML構造の確認
@@ -233,13 +263,16 @@ export class KindleXMLParser {
       this.processLargeMetadataList(metadataList, books);
 
       if (errorCount > 0) {
-        logger.warn(`${errorCount}件の書籍でメタデータ抽出エラーが発生しました`);
+        logger.warn(
+          `${errorCount}件の書籍でメタデータ抽出エラーが発生しました`
+        );
       }
 
       return books;
-
     } catch (error) {
-      logger.error(`メタデータ抽出中にエラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `メタデータ抽出中にエラーが発生しました: ${error instanceof Error ? error.message : String(error)}`
+      );
       throw new Error(`${KINDLE_ERRORS.PARSE_ERROR}: メタデータ抽出失敗`);
     }
   }
@@ -247,7 +280,10 @@ export class KindleXMLParser {
   /**
    * 大量データ処理（CLAUDE.mdのパターンに従う）
    */
-  private processLargeMetadataList(metadataList: MetadataElement[], books: BookMetadata[]): void {
+  private processLargeMetadataList(
+    metadataList: MetadataElement[],
+    books: BookMetadata[]
+  ): void {
     const CHUNK_SIZE = 100;
 
     for (let i = 0; i < metadataList.length; i += CHUNK_SIZE) {
@@ -256,7 +292,9 @@ export class KindleXMLParser {
 
       // 大量処理の場合の進捗ログ
       if (metadataList.length > 1000 && (i + CHUNK_SIZE) % 500 === 0) {
-        logger.info(`処理進捗: ${Math.min(i + CHUNK_SIZE, metadataList.length)}/${metadataList.length}冊`);
+        logger.info(
+          `処理進捗: ${Math.min(i + CHUNK_SIZE, metadataList.length)}/${metadataList.length}冊`
+        );
       }
     }
   }
@@ -264,7 +302,10 @@ export class KindleXMLParser {
   /**
    * メタデータチャンクの処理
    */
-  private processMetadataChunk(chunk: MetadataElement[], books: BookMetadata[]): void {
+  private processMetadataChunk(
+    chunk: MetadataElement[],
+    books: BookMetadata[]
+  ): void {
     for (const metadata of chunk) {
       try {
         const book = this.extractSingleBookMetadata(metadata);
@@ -273,7 +314,9 @@ export class KindleXMLParser {
         }
       } catch (error) {
         // 個別の書籍エラーはログ出力のみ（処理継続）
-        logger.warn(`書籍メタデータの処理をスキップしました: ${error instanceof Error ? error.message : String(error)}`);
+        logger.warn(
+          `書籍メタデータの処理をスキップしました: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     }
   }
@@ -281,7 +324,9 @@ export class KindleXMLParser {
   /**
    * 単一書籍のメタデータ抽出
    */
-  private extractSingleBookMetadata(metadata: MetadataElement): BookMetadata | null {
+  private extractSingleBookMetadata(
+    metadata: MetadataElement
+  ): BookMetadata | null {
     try {
       // ASIN必須チェック
       if (!metadata.ASIN) {
@@ -325,13 +370,14 @@ export class KindleXMLParser {
         purchaseDate,
         contentType,
         mimeType,
-        originType
+        originType,
       };
 
       return book;
-
     } catch (error) {
-      logger.warn(`書籍メタデータ抽出エラー (ASIN: ${metadata.ASIN || 'unknown'}): ${error instanceof Error ? error.message : String(error)}`);
+      logger.warn(
+        `書籍メタデータ抽出エラー (ASIN: ${metadata.ASIN || 'unknown'}): ${error instanceof Error ? error.message : String(error)}`
+      );
       return null;
     }
   }
@@ -339,7 +385,10 @@ export class KindleXMLParser {
   /**
    * タイトルと発音の抽出
    */
-  private extractTitle(metadata: MetadataElement): { title: string; titlePronunciation?: string } {
+  private extractTitle(metadata: MetadataElement): {
+    title: string;
+    titlePronunciation?: string;
+  } {
     if (typeof metadata.title === 'string') {
       return { title: metadata.title.trim() };
     }
@@ -350,7 +399,7 @@ export class KindleXMLParser {
 
       return {
         title: title.trim(),
-        titlePronunciation: titlePronunciation?.trim()
+        titlePronunciation: titlePronunciation?.trim(),
       };
     }
 
@@ -360,7 +409,10 @@ export class KindleXMLParser {
   /**
    * 著者情報の抽出
    */
-  private extractAuthor(metadata: MetadataElement): { author?: string; authorPronunciation?: string } {
+  private extractAuthor(metadata: MetadataElement): {
+    author?: string;
+    authorPronunciation?: string;
+  } {
     if (!metadata.authors?.author) {
       return { author: undefined };
     }
@@ -389,7 +441,8 @@ export class KindleXMLParser {
 
       return {
         author: authors.length > 0 ? authors.join(', ') : undefined,
-        authorPronunciation: pronunciations.length > 0 ? pronunciations.join(', ') : undefined
+        authorPronunciation:
+          pronunciations.length > 0 ? pronunciations.join(', ') : undefined,
       };
     }
 
@@ -397,14 +450,17 @@ export class KindleXMLParser {
     const { name, pronunciation } = this.extractSingleAuthor(authorData);
     return {
       author: name,
-      authorPronunciation: pronunciation
+      authorPronunciation: pronunciation,
     };
   }
 
   /**
    * 単一著者情報の抽出
    */
-  private extractSingleAuthor(author: AuthorElement | string): { name?: string; pronunciation?: string } {
+  private extractSingleAuthor(author: AuthorElement | string): {
+    name?: string;
+    pronunciation?: string;
+  } {
     if (typeof author === 'string') {
       return { name: author.trim() };
     }
@@ -415,7 +471,7 @@ export class KindleXMLParser {
 
       return {
         name: name?.trim(),
-        pronunciation: pronunciation?.trim()
+        pronunciation: pronunciation?.trim(),
       };
     }
 
@@ -433,10 +489,14 @@ export class KindleXMLParser {
    * 日付の抽出と検証
    */
   private extractDate(dateString?: string): string | undefined {
-    if (!dateString) return undefined;
+    if (!dateString) {
+      return undefined;
+    }
 
     const trimmed = dateString.trim();
-    if (!trimmed) return undefined;
+    if (!trimmed) {
+      return undefined;
+    }
 
     // ISO形式の日付として妥当性チェック
     const date = new Date(trimmed);
@@ -451,12 +511,18 @@ export class KindleXMLParser {
   /**
    * 書籍取得方法の抽出
    */
-  private extractOriginType(metadata: MetadataElement): BookOriginType | undefined {
+  private extractOriginType(
+    metadata: MetadataElement
+  ): BookOriginType | undefined {
     const origins = metadata.origins;
-    if (!origins?.origin) return undefined;
+    if (!origins?.origin) {
+      return undefined;
+    }
 
     // 配列の場合は最初の要素を使用
-    const origin = Array.isArray(origins.origin) ? origins.origin[0] : origins.origin;
+    const origin = Array.isArray(origins.origin)
+      ? origins.origin[0]
+      : origins.origin;
 
     const type = origin?.type;
     if (type === 'Purchase' || type === 'KindleUnlimited') {

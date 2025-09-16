@@ -8,7 +8,9 @@ Kindle蔵書管理アプリケーション（kindle_bookmark）は、個人の�
 
 ## プロジェクト状況
 
-- **現在の状態**: 要件定義完了
+- **現在の状態**: 基盤実装フェーズ（T103完了、T104が次）
+- **完了チケット**: T001-T004, T101, T103, T201-T202, T401-T402
+- **次のチケット**: T104（エラーハンドリング基盤）
 - **主要言語**: TypeScript（Node.js + React）
 - **ビルドシステム**: npm/yarn
 - **対象プラットフォーム**: Windows（ローカル配布）
@@ -203,22 +205,18 @@ type TestPathKey = keyof typeof TEST_PATHS;
 ### ログ出力
 
 ```typescript
-// ログレベル型定義
-type LogLevel = 'INFO' | 'WARN' | 'ERROR';
+// T103で実装されたWinstonログシステムを使用
+import { log } from './utils/logger';
 
-// ログ関数の型定義
-type LogFunction = (message: string) => void;
-
-// 統一されたログ形式（日本語）
-const logger: Record<'info' | 'warn' | 'error', LogFunction> = {
-  info: (message: string): void => console.log(`[INFO] ${new Date().toISOString()} - ${message}`),
-  warn: (message: string): void => console.warn(`[WARN] ${new Date().toISOString()} - ${message}`),
-  error: (message: string): void => console.error(`[ERROR] ${new Date().toISOString()} - ${message}`)
-};
+// ログレベル: error, warn, info, debug
+// ファイル出力（./logs/app.log）とコンソール出力の両対応
+// ログローテーション（5MB、最大10ファイル）
 
 // 使用例
-logger.info('Kindleファイルの読み込みを開始します');
-logger.error('XMLファイルの解析に失敗しました');
+log.info('Kindleファイルの読み込みを開始します');
+log.error('XMLファイルの解析に失敗しました', error);
+log.kindle('parse_xml', { fileName: 'metadata.xml', count: 150 });
+log.request('GET', '/api/books', 200, 25);
 ```
 
 ## トラブルシューティング
