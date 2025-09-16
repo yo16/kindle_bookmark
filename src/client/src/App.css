@@ -1,0 +1,239 @@
+/* Kindle蔵書管理システム - メインアプリケーションスタイル */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+    'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+}
+
+/* ヘッダー */
+.app-header {
+  background: linear-gradient(135deg, #232f3e 0%, #37485a 100%);
+  padding: 1.5rem 2rem;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sync-status {
+  font-size: 0.9rem;
+  color: #d1d5db;
+  min-width: 120px;
+  text-align: right;
+}
+
+.sync-button {
+  background: linear-gradient(135deg, #ff9500 0%, #ffb84d 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 149, 0, 0.3);
+  min-width: 80px;
+}
+
+.sync-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e6850e 0%, #ff9500 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 149, 0, 0.4);
+}
+
+.sync-button:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* メインコンテンツ */
+.app-main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.welcome-section h2 {
+  font-size: 2.5rem;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 400;
+}
+
+.content-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.placeholder-card {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  max-width: 500px;
+  width: 100%;
+}
+
+.placeholder-card h3 {
+  font-size: 1.5rem;
+  color: #374151;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.placeholder-card p {
+  color: #6b7280;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.feature-list {
+  text-align: left;
+}
+
+.feature-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-list li {
+  padding: 0.75rem 0;
+  color: #374151;
+  font-size: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+}
+
+.feature-list li:last-child {
+  border-bottom: none;
+}
+
+/* フッター */
+.app-footer {
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  color: #6b7280;
+  margin-top: auto;
+}
+
+.app-footer p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.tech-info {
+  font-size: 0.8rem !important;
+  color: #9ca3af !important;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .header-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sync-status {
+    text-align: center;
+    min-width: auto;
+  }
+
+  .app-main {
+    padding: 1rem;
+  }
+
+  .welcome-section h2 {
+    font-size: 2rem;
+  }
+
+  .placeholder-card {
+    padding: 2rem 1rem;
+  }
+}
+
+/* ローディング状態のアニメーション */
+.sync-button:disabled {
+  position: relative;
+}
+
+.sync-button:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

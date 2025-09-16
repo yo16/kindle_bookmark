@@ -1,0 +1,74 @@
+/* グローバルスタイルとリセット */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+    'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #374151;
+  line-height: 1.5;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* フォーカスアウトライン */
+button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* スクロールバーのスタイリング（Webkit） */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 選択テキストのスタイル */
+::selection {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* ダークモードのメディアクエリ（将来の拡張用） */
+@media (prefers-color-scheme: dark) {
+  /* ダークモード対応は Phase2 で実装予定 */
+}
+
+/* 印刷スタイル */
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .sync-button {
+    display: none !important;
+  }
+
+  .app-footer {
+    display: none !important;
+  }
+}
