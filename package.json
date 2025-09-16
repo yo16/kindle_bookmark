@@ -12,7 +12,8 @@
     "setup:client": "cd src/client && npm install",
     "setup:all": "npm run setup:server && npm run setup:client",
     "build:server": "cd src/server && npm run build",
-    "build:client": "cd src/client && npm run build",
+    "build:client": "cd src/client && NODE_OPTIONS=\"--max-old-space-size=4096\" npm run build",
+    "build:client:fast": "cd src/client && GENERATE_SOURCEMAP=false NODE_OPTIONS=\"--max-old-space-size=4096\" npm run build",
     "build:all": "npm run build:server && npm run build:client",
     "dev:server": "cd src/server && npm run dev",
     "dev:client": "cd src/client && npm start"
