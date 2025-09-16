@@ -17,7 +17,14 @@ jest.mock('sqlite3');
 describe('KindleCollectionParser', () => {
   let parser: KindleCollectionParser;
   const mockUserProfile = 'C:\\Users\\TestUser';
-  const expectedCacheDir = path.join(mockUserProfile, 'AppData', 'Local', 'Amazon', 'Kindle', 'Cache');
+  const expectedCacheDir = path.join(
+    mockUserProfile,
+    'AppData',
+    'Local',
+    'Amazon',
+    'Kindle',
+    'Cache'
+  );
 
   beforeEach(() => {
     // 環境変数の設定
@@ -32,7 +39,9 @@ describe('KindleCollectionParser', () => {
   describe('初期化', () => {
     it('Windows環境でのみ動作する', () => {
       delete process.env.USERPROFILE;
-      expect(() => new KindleCollectionParser()).toThrow('Windows環境でのみ動作します');
+      expect(() => new KindleCollectionParser()).toThrow(
+        'Windows環境でのみ動作します'
+      );
     });
 
     it('正しいキャッシュディレクトリパスを設定する', () => {
@@ -43,63 +52,71 @@ describe('KindleCollectionParser', () => {
   });
 
   describe('parseCollectionDB', () => {
-    const validDBPath = path.join(expectedCacheDir, 'db', 'synced_collections.db');
+    const validDBPath = path.join(
+      expectedCacheDir,
+      'db',
+      'synced_collections.db'
+    );
     const invalidDBPath = 'C:\\invalid\\path\\test.db';
 
     beforeEach(() => {
       // ファイル統計情報のモック
       (fs.stat as jest.Mock).mockResolvedValue({
         isFile: () => true,
-        size: 1024 * 1024 // 1MB
+        size: 1024 * 1024, // 1MB
       });
     });
 
     it('不正なファイルパスを拒否する', async () => {
-      await expect(parser.parseCollectionDB(invalidDBPath))
-        .rejects
-        .toThrow('セキュリティ違反: 不正なファイルパスです');
+      await expect(parser.parseCollectionDB(invalidDBPath)).rejects.toThrow(
+        'セキュリティ違反: 不正なファイルパスです'
+      );
     });
 
     it('非SQLiteファイルを拒否する', async () => {
       const xmlPath = path.join(expectedCacheDir, 'test.xml');
-      await expect(parser.parseCollectionDB(xmlPath))
-        .rejects
-        .toThrow('SQLiteデータベースファイルのみ処理可能です');
+      await expect(parser.parseCollectionDB(xmlPath)).rejects.toThrow(
+        'SQLiteデータベースファイルのみ処理可能です'
+      );
     });
 
     it('ファイルが存在しない場合エラーを返す', async () => {
       (fs.stat as jest.Mock).mockRejectedValue({ code: 'ENOENT' });
 
-      await expect(parser.parseCollectionDB(validDBPath))
-        .rejects
-        .toThrow('Kindleのキャッシュファイルが見つかりません');
+      await expect(parser.parseCollectionDB(validDBPath)).rejects.toThrow(
+        'Kindleのキャッシュファイルが見つかりません'
+      );
     });
 
     it('空のファイルを拒否する', async () => {
       (fs.stat as jest.Mock).mockResolvedValue({
         isFile: () => true,
-        size: 0
+        size: 0,
       });
 
-      await expect(parser.parseCollectionDB(validDBPath))
-        .rejects
-        .toThrow('データベースファイルが空です');
+      await expect(parser.parseCollectionDB(validDBPath)).rejects.toThrow(
+        'データベースファイルが空です'
+      );
     });
 
     it('大きすぎるファイルを拒否する', async () => {
       (fs.stat as jest.Mock).mockResolvedValue({
         isFile: () => true,
-        size: 100 * 1024 * 1024 // 100MB
+        size: 100 * 1024 * 1024, // 100MB
       });
 
-      await expect(parser.parseCollectionDB(validDBPath))
-        .rejects
-        .toThrow('データベースファイルが大きすぎます');
+      await expect(parser.parseCollectionDB(validDBPath)).rejects.toThrow(
+        'データベースファイルが大きすぎます'
+      );
     });
   });
 
   describe('detectDBPath', () => {
-    const defaultDBPath = path.join(expectedCacheDir, 'db', 'synced_collections.db');
+    const defaultDBPath = path.join(
+      expectedCacheDir,
+      'db',
+      'synced_collections.db'
+    );
     const altDBPath = path.join(expectedCacheDir, 'synced_collections.db');
 
     it('デフォルトパスでデータベースを検出する', async () => {
@@ -131,14 +148,14 @@ describe('KindleCollectionParser', () => {
       const collections = [
         { id: 'col1', name: 'コレクション1', bookCount: 0 },
         { id: 'col2', name: 'コレクション2', bookCount: 0 },
-        { id: 'col3', name: 'コレクション3', bookCount: 0 }
+        { id: 'col3', name: 'コレクション3', bookCount: 0 },
       ];
 
       const associations = [
         { collectionId: 'col1', bookAsin: 'B001234567' as any },
         { collectionId: 'col1', bookAsin: 'B001234568' as any },
         { collectionId: 'col2', bookAsin: 'B001234569' as any },
-        { collectionId: 'col1', bookAsin: 'B001234570' as any }
+        { collectionId: 'col1', bookAsin: 'B001234570' as any },
       ];
 
       parser.updateBookCounts(collections, associations);
@@ -149,13 +166,13 @@ describe('KindleCollectionParser', () => {
     });
 
     it('空の関連付けでもエラーにならない', () => {
-      const collections = [
-        { id: 'col1', name: 'コレクション1', bookCount: 0 }
-      ];
+      const collections = [{ id: 'col1', name: 'コレクション1', bookCount: 0 }];
 
       const associations: any[] = [];
 
-      expect(() => parser.updateBookCounts(collections, associations)).not.toThrow();
+      expect(() =>
+        parser.updateBookCounts(collections, associations)
+      ).not.toThrow();
       expect(collections[0].bookCount).toBe(0);
     });
   });
@@ -165,21 +182,27 @@ describe('KindleCollectionParser', () => {
       const mockDb = {
         configure: jest.fn(),
         close: jest.fn((callback) => callback(null)),
-        all: jest.fn((_query, callback) => callback(null, []))
+        all: jest.fn((_query, callback) => callback(null, [])),
       };
 
-      (sqlite3.Database as unknown as jest.Mock).mockImplementation((_path: any, mode: any, callback: any) => {
-        expect(mode).toBe(sqlite3.OPEN_READONLY);
-        setTimeout(() => callback(null), 0);
-        return mockDb;
-      });
+      (sqlite3.Database as unknown as jest.Mock).mockImplementation(
+        (_path: any, mode: any, callback: any) => {
+          expect(mode).toBe(sqlite3.OPEN_READONLY);
+          setTimeout(() => callback(null), 0);
+          return mockDb;
+        }
+      );
 
       (fs.stat as jest.Mock).mockResolvedValue({
         isFile: () => true,
-        size: 1024
+        size: 1024,
       });
 
-      const validDBPath = path.join(expectedCacheDir, 'db', 'synced_collections.db');
+      const validDBPath = path.join(
+        expectedCacheDir,
+        'db',
+        'synced_collections.db'
+      );
       const result = await parser.parseCollectionDB(validDBPath);
 
       expect(result).toHaveProperty('collections');
@@ -188,35 +211,47 @@ describe('KindleCollectionParser', () => {
     });
 
     it('データベースロックエラーを適切に処理する', async () => {
-      (sqlite3.Database as unknown as jest.Mock).mockImplementation((_path, _mode, callback) => {
-        callback(new Error('database is locked'));
-      });
+      (sqlite3.Database as unknown as jest.Mock).mockImplementation(
+        (_path, _mode, callback) => {
+          callback(new Error('database is locked'));
+        }
+      );
 
       (fs.stat as jest.Mock).mockResolvedValue({
         isFile: () => true,
-        size: 1024
+        size: 1024,
       });
 
-      const validDBPath = path.join(expectedCacheDir, 'db', 'synced_collections.db');
-      await expect(parser.parseCollectionDB(validDBPath))
-        .rejects
-        .toThrow('データベースファイルがロックされています');
+      const validDBPath = path.join(
+        expectedCacheDir,
+        'db',
+        'synced_collections.db'
+      );
+      await expect(parser.parseCollectionDB(validDBPath)).rejects.toThrow(
+        'データベースファイルがロックされています'
+      );
     });
 
     it('無効なデータベースファイルを検出する', async () => {
-      (sqlite3.Database as unknown as jest.Mock).mockImplementation((_path, _mode, callback) => {
-        callback(new Error('file is not a database'));
-      });
+      (sqlite3.Database as unknown as jest.Mock).mockImplementation(
+        (_path, _mode, callback) => {
+          callback(new Error('file is not a database'));
+        }
+      );
 
       (fs.stat as jest.Mock).mockResolvedValue({
         isFile: () => true,
-        size: 1024
+        size: 1024,
       });
 
-      const validDBPath = path.join(expectedCacheDir, 'db', 'synced_collections.db');
-      await expect(parser.parseCollectionDB(validDBPath))
-        .rejects
-        .toThrow('データベースファイルの形式が無効です');
+      const validDBPath = path.join(
+        expectedCacheDir,
+        'db',
+        'synced_collections.db'
+      );
+      await expect(parser.parseCollectionDB(validDBPath)).rejects.toThrow(
+        'データベースファイルの形式が無効です'
+      );
     });
   });
 
@@ -232,30 +267,39 @@ describe('KindleCollectionParser', () => {
         }),
         all: jest.fn((_query, callback) => {
           // 大量データをシミュレート
-          const mockData = Array(1000).fill(null).map((_, i) => ({
-            id: `col${i}`,
-            name: `Collection ${i}`
-          }));
+          const mockData = Array(1000)
+            .fill(null)
+            .map((_, i) => ({
+              id: `col${i}`,
+              name: `Collection ${i}`,
+            }));
           callback(null, mockData);
-        })
+        }),
       };
 
-      (sqlite3.Database as unknown as jest.Mock).mockImplementation((_path: any, _mode: any, callback: any) => {
-        setTimeout(() => callback(null), 0);
-        return mockDb;
-      });
+      (sqlite3.Database as unknown as jest.Mock).mockImplementation(
+        (_path: any, _mode: any, callback: any) => {
+          setTimeout(() => callback(null), 0);
+          return mockDb;
+        }
+      );
 
       (fs.stat as jest.Mock).mockResolvedValue({
         isFile: () => true,
-        size: 1024
+        size: 1024,
       });
 
       // パフォーマンス目標を超過するようにモック
-      jest.spyOn(Date, 'now')
-        .mockReturnValueOnce(0)      // 開始時刻
-        .mockReturnValueOnce(6000);  // 終了時刻（6秒後）
+      jest
+        .spyOn(Date, 'now')
+        .mockReturnValueOnce(0) // 開始時刻
+        .mockReturnValueOnce(6000); // 終了時刻（6秒後）
 
-      const validDBPath = path.join(expectedCacheDir, 'db', 'synced_collections.db');
+      const validDBPath = path.join(
+        expectedCacheDir,
+        'db',
+        'synced_collections.db'
+      );
       await parser.parseCollectionDB(validDBPath);
 
       expect(consoleSpy).toHaveBeenCalledWith(

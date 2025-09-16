@@ -105,11 +105,13 @@ export interface MetadataElement {
   cde_contenttype?: string;
   content_type?: string;
   origins?: {
-    origin: {
-      type: BookOriginType;
-    } | {
-      type: BookOriginType;
-    }[];
+    origin:
+      | {
+          type: BookOriginType;
+        }
+      | {
+          type: BookOriginType;
+        }[];
   };
 }
 
