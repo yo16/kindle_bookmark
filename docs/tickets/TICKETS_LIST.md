@@ -9,17 +9,17 @@
 | **T003** | クライアント依存関係設定 | High | 0.5日 | Frontend | T001 |
 | **T004** | ESLint/Prettier設定 | Medium | 0.5日 | Full-stack | T001 |
 | **T101** | Express基本サーバー | Critical | 1日 | Backend | T002 |
-| **T102** | SQLite接続とDB初期化 | High | 0.5日 | Backend | T101 |
+| **T102** | SQLite接続とDB初期化（Phase2） | Low | 0.5日 | Backend | T101 |
 | **T103** | 環境変数とログ設定 | High | 0.5日 | Backend | T101 |
 | **T104** | エラーハンドリング基盤 | Medium | 0.5日 | Backend | T101 |
 | **T201** | XMLパーサー実装 | Critical | 1日 | Backend | T002 |
 | **T202** | SQLiteパーサー実装 | Critical | 1日 | Backend | T002 |
 | **T203** | パス自動検出機能 | High | 0.5日 | Backend | T201,T202 |
 | **T204** | 書籍データモデル定義 | High | 0.5日 | Backend | T201,T202 |
-| **T301** | GET /api/books エンドポイント | Critical | 0.5日 | Backend | T102,T203 |
-| **T302** | POST /api/sync エンドポイント | High | 0.5日 | Backend | T102,T203 |
-| **T303** | GET /api/collections エンドポイント | High | 0.5日 | Backend | T102,T203 |
-| **T304** | POST /api/books/{asin}/open エンドポイント | High | 0.5日 | Backend | T102 |
+| **T301** | GET /api/books エンドポイント | Critical | 0.5日 | Backend | T203,T204 |
+| **T302** | POST /api/sync エンドポイント | High | 0.5日 | Backend | T203,T204 |
+| **T303** | GET /api/collections エンドポイント | High | 0.5日 | Backend | T203,T204 |
+| **T304** | POST /api/books/{asin}/open エンドポイント | High | 0.5日 | Backend | T601 |
 | **T305** | API統合テスト | Medium | 0.5日 | Backend | T301-T304 |
 | **T401** | React基本アプリケーション | Critical | 1日 | Frontend | T003 |
 | **T402** | TypeScript型定義 | High | 0.5日 | Frontend | T401 |
@@ -44,7 +44,7 @@ Day 1: T001 (プロジェクト構造)
 Day 2: T002, T003, T004 (依存関係・設定)
 Day 3: T101, T401 (サーバー・クライアント基盤)
 Day 4: T201, T402 (XMLパーサー・型定義)
-Day 5: T202, T102, T103 (SQLiteパーサー・DB・環境設定)
+Day 5: T202, T103, T104 (SQLiteパーサー・環境設定・エラーハンドリング)
 ```
 
 ### Week 2: API・UI実装
@@ -76,7 +76,10 @@ Day 14: 統合調整・デプロイ準備
 
 ### クリティカルパス
 必須チケット（Critical優先度）：
-T001 → T101 → T201 → T202 → T301 → T401 → T501 → T505
+T001 → T101 → T201/T202 → T203/T204 → T301 → T401 → T501 → T505
+
+### Phase2チケット（MVP後実装）
+T102（SQLite接続とDB初期化）はPhase2のタグ機能実装時に実施
 
 ### 並行作業可能な組み合わせ
 - T002, T003, T004（環境設定系）
