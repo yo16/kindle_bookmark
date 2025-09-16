@@ -6,7 +6,7 @@
 - **優先度**: Critical
 - **見積もり**: 1日（8時間）
 - **担当**: Backend
-- **ステータス**: TODO
+- **ステータス**: DONE
 
 ## 🎯 概要
 KindleSyncMetadataCache.xmlファイルを解析し、書籍メタデータを抽出する機能を実装する。
