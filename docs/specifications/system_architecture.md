@@ -53,64 +53,70 @@
 
 ```
 kindle_bookmark/
-├── doc/                        # ドキュメント
-│   ├── requirements_definition.md
-│   ├── system_architecture.md
-│   └── api_specification.md
+├── docs/                       # ドキュメント
+│   └── specifications/
+│       ├── requirements_definition.md
+│       ├── system_architecture.md
+│       └── api_specification.md
 │
-├── server/                     # バックエンド（Node.js + Express）
-│   ├── src/
-│   │   ├── app.js             # Expressアプリケーション設定
-│   │   ├── server.js          # サーバー起動エントリーポイント
-│   │   ├── config/
-│   │   │   └── database.js    # DB接続設定
-│   │   ├── routes/
-│   │   │   ├── books.js       # 書籍関連API
-│   │   │   ├── sync.js        # 同期API
-│   │   │   └── collections.js # コレクション関連API
-│   │   ├── services/
-│   │   │   ├── kindleParser.js    # XMLパーサー
-│   │   │   ├── collectionParser.js # SQLiteパーサー
-│   │   │   ├── kindleLauncher.js  # Kindle起動処理
-│   │   │   └── pathDetector.js    # パス自動検出
-│   │   ├── models/
-│   │   │   ├── book.js        # 書籍モデル
-│   │   │   └── tag.js         # タグモデル（Phase2）
-│   │   └── utils/
-│   │       └── logger.js      # ロギング
-│   ├── data/
-│   │   └── app.db             # SQLiteデータベース
-│   ├── package.json
-│   └── .env.example           # 環境変数サンプル
-│
-├── client/                     # フロントエンド（React）
-│   ├── public/
-│   │   └── index.html
-│   ├── src/
-│   │   ├── App.js             # メインアプリケーション
-│   │   ├── index.js           # エントリーポイント
-│   │   ├── components/
-│   │   │   ├── BookGrid.js    # グリッド表示
-│   │   │   ├── BookList.js    # リスト表示
-│   │   │   ├── BookCard.js    # 書籍カード
-│   │   │   ├── SearchBar.js   # 検索バー
-│   │   │   ├── FilterPanel.js # フィルターパネル
-│   │   │   └── ViewToggle.js  # 表示切替
-│   │   ├── services/
-│   │   │   └── api.js         # APIクライアント
-│   │   ├── hooks/
-│   │   │   ├── useBooks.js    # 書籍データフック
-│   │   │   └── useFilter.js   # フィルターフック
-│   │   └── styles/
-│   │       └── App.css
-│   ├── package.json
-│   └── .env.example
+├── src/                        # アプリケーションソースコード
+│   ├── server/                 # バックエンド（Node.js + Express）
+│   │   ├── src/
+│   │   │   ├── app.ts             # Expressアプリケーション設定
+│   │   │   ├── server.ts          # サーバー起動エントリーポイント
+│   │   │   ├── config/
+│   │   │   │   └── database.ts    # DB接続設定
+│   │   │   ├── routes/
+│   │   │   │   ├── books.ts       # 書籍関連API
+│   │   │   │   ├── sync.ts        # 同期API
+│   │   │   │   └── collections.ts # コレクション関連API
+│   │   │   ├── services/
+│   │   │   │   ├── kindleParser.ts    # XMLパーサー
+│   │   │   │   ├── collectionParser.ts # SQLiteパーサー
+│   │   │   │   ├── kindleLauncher.ts  # Kindle起動処理
+│   │   │   │   └── pathDetector.ts    # パス自動検出
+│   │   │   ├── models/
+│   │   │   │   ├── book.ts        # 書籍モデル
+│   │   │   │   └── tag.ts         # タグモデル（Phase2）
+│   │   │   └── utils/
+│   │   │       └── logger.ts      # ロギング
+│   │   ├── data/
+│   │   │   └── app.db             # SQLiteデータベース
+│   │   ├── package.json
+│   │   └── .env.example           # 環境変数サンプル
+│   │
+│   └── client/                     # フロントエンド（React）
+│       ├── public/
+│       │   └── index.html
+│       ├── src/
+│       │   ├── App.tsx            # メインアプリケーション
+│       │   ├── index.tsx          # エントリーポイント
+│       │   ├── components/
+│       │   │   ├── BookGrid.tsx   # グリッド表示
+│       │   │   ├── BookList.tsx   # リスト表示
+│       │   │   ├── BookCard.tsx   # 書籍カード
+│       │   │   ├── SearchBar.tsx  # 検索バー
+│       │   │   ├── FilterPanel.tsx # フィルターパネル
+│       │   │   └── ViewToggle.tsx # 表示切替
+│       │   ├── services/
+│       │   │   └── api.ts         # APIクライアント
+│       │   ├── hooks/
+│       │   │   ├── useBooks.ts    # 書籍データフック
+│       │   │   └── useFilter.ts   # フィルターフック
+│       │   ├── types/
+│       │   │   └── index.ts       # TypeScript型定義
+│       │   └── styles/
+│       │       └── App.css
+│       ├── package.json
+│       ├── tsconfig.json          # TypeScript設定
+│       └── .env.example
 │
 ├── scripts/                    # ユーティリティスクリプト
-│   └── setup.js               # 初期セットアップ
+│   └── setup.ts               # 初期セットアップ
 │
 ├── .gitignore
 ├── README.md
+├── tsconfig.json              # ルートTypeScript設定
 └── package.json               # ルートpackage.json（Electron用）
 ```
 
@@ -279,15 +285,47 @@ const readKindleFile = async (filePath) => {
 | Kindleアプリ起動失敗 | 代替方法の提示 | 「Kindleアプリを手動で起動してください」|
 | DB接続エラー | インメモリで動作継続 | 「設定は保存されません」|
 
-### 6.2 ログ設計
-```javascript
+### 6.2 Kindleファイルパス自動検出
+
+```typescript
+// パス検出の優先順位
+const KINDLE_PATH_CANDIDATES = [
+  path.join(process.env.USERPROFILE!, 'AppData', 'Local', 'Amazon', 'Kindle', 'Cache'),
+  path.join(process.env.LOCALAPPDATA!, 'Amazon', 'Kindle', 'Cache'),
+  // 手動設定パス（環境変数から）
+  process.env.KINDLE_CACHE_PATH
+].filter(Boolean);
+
+// ファイル検出ロジック
+async function detectKindleFiles(): Promise<KindlePaths | null> {
+  for (const basePath of KINDLE_PATH_CANDIDATES) {
+    const metadataPath = path.join(basePath, 'KindleSyncMetadataCache.xml');
+    const collectionsPath = path.join(basePath, 'db', 'synced_collections.db');
+
+    if (await fileExists(metadataPath) && await fileExists(collectionsPath)) {
+      return { metadataPath, collectionsPath };
+    }
+  }
+  return null;
+}
+
+interface KindlePaths {
+  metadataPath: string;
+  collectionsPath: string;
+}
+```
+
+### 6.3 ログ設計
+```typescript
 // ログレベル定義
 const LogLevel = {
   ERROR: 'error',   // エラー（要対処）
   WARN: 'warn',     // 警告（動作は継続）
   INFO: 'info',     // 情報（正常動作）
   DEBUG: 'debug'    // デバッグ（開発時のみ）
-};
+} as const;
+
+type LogLevelKey = keyof typeof LogLevel;
 
 // ログ出力先
 // - コンソール（開発時）
@@ -374,7 +412,7 @@ function createWindow() {
   // 本番時: file://
   const startUrl = process.env.ELECTRON_START_URL ||
     url.format({
-      pathname: path.join(__dirname, '../client/build/index.html'),
+      pathname: path.join(__dirname, '../src/client/build/index.html'),
       protocol: 'file:',
       slashes: true
     });
@@ -400,19 +438,19 @@ git clone [repository-url]
 cd kindle_bookmark
 
 # 2. 依存関係インストール
-cd server && npm install
+cd src/server && npm install
 cd ../client && npm install
 
 # 3. 環境変数設定
-cp server/.env.example server/.env
-cp client/.env.example client/.env
+cp src/server/.env.example src/server/.env
+cp src/client/.env.example src/client/.env
 
 # 4. 開発サーバー起動
 # Terminal 1
-cd server && npm run dev
+cd src/server && npm run dev
 
 # Terminal 2
-cd client && npm start
+cd src/client && npm start
 ```
 
 ### 9.2 ビルド・配布（将来）

@@ -260,6 +260,6 @@ file "$USERPROFILE/AppData/Local/Amazon/Kindle/Cache/KindleSyncMetadataCache.xml
 
 ## 開発時の参考資料
 
-- 要件定義書: `./doc/requirements_definition.md`
-- システムアーキテクチャ: `./doc/system_architecture.md`
-- API仕様書: `./doc/api_specification.md`
+- 要件定義書: `./docs/specifications/requirements_definition.md`
+- システムアーキテクチャ: `./docs/specifications/system_architecture.md`
+- API仕様書: `./docs/specifications/api_specification.md`

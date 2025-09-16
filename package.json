@@ -1,0 +1,43 @@
+{
+  "name": "kindle-bookmark",
+  "version": "1.0.0",
+  "description": "Kindle蔵書管理システム",
+  "main": "main.js",
+  "scripts": {
+    "electron": "electron .",
+    "electron:dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "setup:server": "cd src/server && npm install",
+    "setup:client": "cd src/client && npm install",
+    "setup:all": "npm run setup:server && npm run setup:client",
+    "build:server": "cd src/server && npm run build",
+    "build:client": "cd src/client && npm run build",
+    "build:all": "npm run build:server && npm run build:client",
+    "dev:server": "cd src/server && npm run dev",
+    "dev:client": "cd src/client && npm start"
+  },
+  "keywords": ["kindle", "bookmark", "ebook", "electron", "typescript"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "com.example.kindle-bookmark",
+    "productName": "Kindle Bookmark Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "src/server/dist/**/*",
+      "src/client/build/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    }
+  }
+}

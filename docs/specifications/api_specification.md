@@ -77,15 +77,13 @@ GET /api/books?search=プログラミング&sort=title_asc&limit=20
         "asin": "B08XVZ7L5N",
         "title": "プログラミングTypeScript",
         "author": "Boris Cherny",
-        "collections": ["技術書", "TypeScript"],
-        "tags": ["未読", "優先度高"]
+        "collections": ["技術書", "TypeScript"]
       },
       {
         "asin": "B07D4H8N31",
         "title": "リーダブルコード",
         "author": "Dustin Boswell, Trevor Foucher",
-        "collections": ["技術書"],
-        "tags": ["既読", "おすすめ"]
+        "collections": ["技術書"]
       }
     ],
     "totalCount": 245,
@@ -454,7 +452,8 @@ interface Book {
   title: string;
   author: string;
   collections: string[];
-  tags?: string[];
+  // Phase1では以下のフィールドは含まれない
+  // tags?: string[];        // タグの配列（Phase2で追加予定）
 }
 
 interface Collection {

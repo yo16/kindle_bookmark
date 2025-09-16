@@ -138,4 +138,16 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Project specific
+src/server/dist/
+src/client/build/
+*.db
+logs/*.log
+data/*.db
+dist/
+
+# Electron
+main.js
+
+# Sample files (for development only)
 sample_file/
