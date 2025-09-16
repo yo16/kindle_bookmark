@@ -19,7 +19,7 @@ app.get('/', (_req, res) => {
     message: 'Kindle Bookmark Manager API Server',
     description: 'Kindle蔵書管理システム API サーバー',
     version: '1.0.0',
-    status: 'running'
+    status: 'running',
   });
 });
 
@@ -28,7 +28,7 @@ app.get('/health', (_req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
   });
 });
 
@@ -39,23 +39,30 @@ app.get('/api/v1', (_req, res) => {
     endpoints: {
       books: '/api/v1/books',
       sync: '/api/v1/sync',
-      collections: '/api/v1/collections'
-    }
+      collections: '/api/v1/collections',
+    },
   });
 });
 
 // エラーハンドリング
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('エラーが発生しました:', err.stack);
-  res.status(500).json({
-    success: false,
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'サーバー内部エラーが発生しました',
-      timestamp: new Date().toISOString()
-    }
-  });
-});
+app.use(
+  (
+    err: Error,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction
+  ) => {
+    console.error('エラーが発生しました:', err.stack);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'サーバー内部エラーが発生しました',
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+);
 
 // 404 ハンドリング
 app.use('*', (req, res) => {
@@ -65,8 +72,8 @@ app.use('*', (req, res) => {
       code: 'NOT_FOUND',
       message: 'エンドポイントが見つかりません',
       path: req.originalUrl,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   });
 });
 
