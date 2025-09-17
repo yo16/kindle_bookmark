@@ -20,6 +20,11 @@ import {
   ParseStatistics,
   BookOriginType,
 } from '../models/book.js';
+import {
+  KindleFileNotFoundError,
+  KindleXmlParseError,
+  KindlePathNotFoundError,
+} from '../utils/errors';
 
 // CLAUDE.mdのパフォーマンス目標値に従う
 const PERFORMANCE_TARGETS = {
@@ -163,7 +168,10 @@ export class KindleXMLParser {
 
     // XMLファイルのみ許可
     if (!normalizedPath.toLowerCase().endsWith('.xml')) {
-      throw new Error('XMLファイルのみ処理可能です');
+      throw new KindleXmlParseError({
+        fileName: xmlPath,
+        parseError: 'XMLファイルのみ処理可能です',
+      });
     }
   }
 
@@ -176,7 +184,9 @@ export class KindleXMLParser {
 
       // ファイル存在確認
       if (!stats.isFile()) {
-        throw new Error('指定されたパスはファイルではありません');
+        throw new KindlePathNotFoundError({
+          path: xmlPath,
+        });
       }
 
       // ファイルサイズ制限チェック
@@ -188,13 +198,19 @@ export class KindleXMLParser {
 
       // 空ファイルチェック
       if (stats.size === 0) {
-        throw new Error('XMLファイルが空です');
+        throw new KindleXmlParseError({
+          fileName: xmlPath,
+          parseError: 'XMLファイルが空です',
+        });
       }
 
       return stats;
     } catch (error) {
       if ((error as { code?: string }).code === 'ENOENT') {
-        throw new Error(KINDLE_ERRORS.FILES_NOT_FOUND);
+        throw new KindleFileNotFoundError({
+          searchedPaths: [this.EXPECTED_KINDLE_CACHE_DIR],
+          fileName: 'KindleSyncMetadataCache.xml',
+        });
       }
       throw error;
     }
@@ -224,7 +240,10 @@ export class KindleXMLParser {
 
       // 基本構造の検証
       if (!result || typeof result !== 'object') {
-        throw new Error('XMLの基本構造が無効です');
+        throw new KindleXmlParseError({
+          fileName: 'unknown',
+          parseError: 'XMLの基本構造が無効です',
+        });
       }
 
       return result as KindleXMLStructure;

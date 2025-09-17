@@ -211,7 +211,7 @@ describe('KindleXMLParser', () => {
       );
 
       // ファイルサイズチェックのモック
-      const originalStat = fs.stat;
+      const _originalStat = fs.stat;
       jest.spyOn(fs, 'stat').mockResolvedValueOnce({
         isFile: () => true,
         size: 15 * 1024 * 1024, // 15MB
@@ -246,7 +246,7 @@ describe('KindleXMLParser', () => {
       expect(books.length).toBeGreaterThan(0);
 
       // 各書籍の必須フィールドを検証
-      books.forEach((book: BookMetadata, index: number) => {
+      books.forEach((book: BookMetadata, _index: number) => {
         expect(book.asin).toBeTruthy();
         expect(book.asin).toMatch(/^[A-Z0-9]{10}$/);
         expect(book.title).toBeTruthy();
