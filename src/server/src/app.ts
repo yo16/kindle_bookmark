@@ -9,6 +9,7 @@ import {
   asyncHandler 
 } from './middleware/errorHandler';
 import { createSuccessResponse } from './utils/errors';
+import booksRouter from './routes/books';
 
 // エラーハンドリングの初期化
 initializeErrorHandling();
@@ -70,6 +71,13 @@ app.get('/', asyncHandler(async (_req: Request, res: Response) => {
     status: 'running',
   }));
 }));
+
+// =====================
+// API ルート
+// =====================
+
+// 書籍APIルーター
+app.use('/api/books', booksRouter);
 
 // API v1 ルート情報（将来の実装用）
 app.get('/api/v1', asyncHandler(async (_req: Request, res: Response) => {

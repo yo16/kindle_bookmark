@@ -11,8 +11,6 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 import { log } from '../utils/logger';
-import { KindlePathNotFoundError } from '../utils/errors';
-import { ERROR_CODES, ERROR_MESSAGES } from '../types/errors';
 
 /**
  * Kindleキャッシュファイルの型定義
@@ -93,6 +91,44 @@ export class PathDetector {
     log.info('Kindleパスの自動検出を開始します', { forceUpdate });
 
     try {
+      // 環境変数による個別パス指定を最優先でチェック（テスト用）
+      // 必ず最初にチェックし、ファイル存在時は即座に使用
+      if (process.env.KINDLE_XML_PATH && process.env.KINDLE_DB_PATH) {
+        log.info('環境変数による個別パス指定を検出しました', {
+          xmlPath: process.env.KINDLE_XML_PATH,
+          dbPath: process.env.KINDLE_DB_PATH,
+        });
+
+        // 指定されたファイルの存在確認
+        try {
+          const xmlPath = path.resolve(process.env.KINDLE_XML_PATH);
+          const dbPath = path.resolve(process.env.KINDLE_DB_PATH);
+
+          const xmlStats = await fs.stat(xmlPath);
+          const dbStats = await fs.stat(dbPath);
+
+          if (xmlStats.isFile() && dbStats.isFile()) {
+            log.info('環境変数で指定されたファイルが存在することを確認しました');
+            return {
+              success: true,
+              paths: {
+                xmlPath,
+                dbPath,
+              },
+              searchedPaths: [xmlPath, dbPath],
+              source: 'env',
+            };
+          }
+        } catch (error) {
+          log.warn('環境変数で指定されたファイルが見つかりません', {
+            xmlPath: process.env.KINDLE_XML_PATH,
+            dbPath: process.env.KINDLE_DB_PATH,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          // 環境変数が設定されていてもファイルが存在しない場合は、通常の検出フローに進む
+        }
+      }
+
       // 既存設定の確認（forceUpdateがfalseの場合）
       if (!forceUpdate) {
         const cachedResult = await this.loadCachedConfiguration();
@@ -119,35 +155,35 @@ export class PathDetector {
             source: candidatePath.source,
           });
 
-          log.info('Kindleパスの自動検出が成功しました', {
-            basePath: candidatePath.basePath,
-            source: candidatePath.source,
-          });
-
           return {
             success: true,
             paths: result.paths!,
-            searchedPaths: pathCandidates.map((p) => p.basePath),
+            searchedPaths: [candidatePath.basePath],
             source: candidatePath.source,
           };
         }
       }
 
-      // 全てのパス候補で失敗
-      const searchedPaths = pathCandidates.map((p) => p.basePath);
-      log.error('Kindleパスの自動検出に失敗しました', { searchedPaths });
+      // すべての候補で見つからなかった
+      const searchedPaths = pathCandidates.map((c) => c.basePath);
+      const errorMessage = `Kindleファイルが見つかりませんでした。検索パス: ${searchedPaths.join(', ')}`;
 
+      log.error(errorMessage);
       return {
         success: false,
-        error: ERROR_MESSAGES[ERROR_CODES.KINDLE_PATH_NOT_FOUND],
+        error: errorMessage,
         searchedPaths,
         source: 'auto',
       };
     } catch (error) {
-      log.error('パス検出中にエラーが発生しました', error);
-      throw new KindlePathNotFoundError({
-        path: 'unknown',
-      });
+      const errorMessage = `パス検出中にエラーが発生しました: ${error instanceof Error ? error.message : String(error)}`;
+      log.error(errorMessage, error);
+      return {
+        success: false,
+        error: errorMessage,
+        searchedPaths: [],
+        source: 'auto',
+      };
     }
   }
 

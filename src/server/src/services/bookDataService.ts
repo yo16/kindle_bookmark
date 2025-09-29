@@ -6,9 +6,9 @@
  * CLAUDE.mdのパフォーマンス要件とセキュリティ要件を遵守
  */
 
-import { KindleXMLParser } from './kindleParser.js';
-import { KindleCollectionParser } from './collectionParser.js';
-import { PathDetector } from './pathDetector.js';
+import { KindleXMLParser } from './kindleParser';
+import { KindleCollectionParser } from './collectionParser';
+import { PathDetector } from './pathDetector';
 import {
   Book,
   Collection,
@@ -19,11 +19,11 @@ import {
   createSafeCollection,
   isValidBook,
   isValidCollection,
-} from '../models/book.js';
+} from '../models/book';
 import {
   KindleFileNotFoundError,
   KindleXmlParseError,
-} from '../utils/errors.js';
+} from '../utils/errors';
 
 // パフォーマンス目標値（CLAUDE.mdに従う）
 const PERFORMANCE_TARGETS = {
@@ -42,7 +42,7 @@ const INTEGRATION_ERRORS = {
   PATH_DETECTION_FAILED: 'Kindleファイルパスの検出に失敗しました',
 } as const;
 
-import { log } from '../utils/logger.js';
+import { log } from '../utils/logger';
 
 /**
  * データ統合の統計情報
@@ -105,10 +105,10 @@ export class BookDataService {
   private readonly collectionParser: KindleCollectionParser;
   private readonly pathDetector: PathDetector;
 
-  constructor() {
-    this.xmlParser = new KindleXMLParser();
-    this.collectionParser = new KindleCollectionParser();
-    this.pathDetector = new PathDetector();
+  constructor(skipPlatformCheck: boolean = false) {
+    this.xmlParser = new KindleXMLParser(skipPlatformCheck);
+    this.collectionParser = new KindleCollectionParser(skipPlatformCheck);
+    this.pathDetector = new PathDetector(skipPlatformCheck);
 
     log.info('書籍データ統合サービスを初期化しました');
   }
@@ -504,9 +504,18 @@ let defaultServiceInstance: BookDataService | null = null;
  */
 export function getBookDataService(): BookDataService {
   if (!defaultServiceInstance) {
-    defaultServiceInstance = new BookDataService();
+    // テスト環境かどうかをチェック
+    const isTestEnv = process.env.NODE_ENV === 'test';
+    defaultServiceInstance = new BookDataService(isTestEnv);
   }
   return defaultServiceInstance;
+}
+
+/**
+ * テスト用書籍データサービスを取得
+ */
+export function getTestBookDataService(): BookDataService {
+  return new BookDataService(true); // skipPlatformCheck = true
 }
 
 /**
