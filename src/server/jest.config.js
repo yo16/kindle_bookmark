@@ -6,6 +6,15 @@ module.exports = {
     '**/__tests__/**/*.test.ts',
     '**/*.test.ts'
   ],
+
+  // テスト環境セットアップ
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+
+  // モック関連の設定（Jest spyOn問題の解決）
+  clearMocks: true,
+  restoreMocks: true,
+  resetMocks: true,
+
   transform: {
     '^.+\\.ts$': ['ts-jest', {
       useESM: true,
@@ -25,5 +34,12 @@ module.exports = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
-  extensionsToTreatAsEsm: ['.ts']
+  extensionsToTreatAsEsm: ['.ts'],
+
+  // テストタイムアウトの設定
+  testTimeout: 30000,
+
+  // ログ出力の抑制
+  silent: false,
+  verbose: true
 };

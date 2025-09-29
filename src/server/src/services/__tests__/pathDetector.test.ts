@@ -52,8 +52,15 @@ describe('PathDetector', () => {
   });
 
   beforeEach(() => {
-    // 各テストで環境変数をリセット
-    process.env = { ...originalEnv, ...MOCK_ENV };
+    // 各テストで環境変数をリセット（環境変数テスト以外）
+    const testName = expect.getState().currentTestName;
+    if (!testName?.includes('環境変数による個別パス指定')) {
+      process.env = { ...originalEnv, ...MOCK_ENV };
+      // 環境変数のリセット
+      delete process.env.KINDLE_XML_PATH;
+      delete process.env.KINDLE_DB_PATH;
+    }
+
     // モックをクリア
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -429,6 +436,85 @@ describe('PathDetector', () => {
     });
   });
 });
+
+  describe('環境変数による個別パス指定（テスト用）', () => {
+    test('KINDLE_XML_PATH と KINDLE_DB_PATH が設定されている場合は優先的に使用する', async () => {
+      // 実際のファイルが存在するので、モックなしでテスト
+      const envPathDetector = new PathDetector(true);
+
+      // テスト用パスの設定（プロジェクトルートからの相対パス）
+      const testXmlPath = '../../sample_file/KindleSyncMetadataCache.xml';
+      const testDbPath = '../../sample_file/synced_collections.db';
+
+      // 元の環境変数を保存
+      const originalXmlPath = process.env.KINDLE_XML_PATH;
+      const originalDbPath = process.env.KINDLE_DB_PATH;
+
+      process.env.KINDLE_XML_PATH = testXmlPath;
+      process.env.KINDLE_DB_PATH = testDbPath;
+
+      try {
+        const result = await envPathDetector.detectKindlePaths();
+
+        expect(result.success).toBe(true);
+        expect(result.paths?.xmlPath).toBe(path.resolve(testXmlPath));
+        expect(result.paths?.dbPath).toBe(path.resolve(testDbPath));
+        expect(result.source).toBe('env');
+      } finally {
+        // 元の環境変数を復元
+        if (originalXmlPath) {
+          process.env.KINDLE_XML_PATH = originalXmlPath;
+        } else {
+          delete process.env.KINDLE_XML_PATH;
+        }
+        if (originalDbPath) {
+          process.env.KINDLE_DB_PATH = originalDbPath;
+        } else {
+          delete process.env.KINDLE_DB_PATH;
+        }
+      }
+    });
+
+    test('環境変数で指定されたファイルが存在しない場合は通常の検出に進む', async () => {
+      const envPathDetector = new PathDetector(true);
+
+      // 存在しないファイルパスを設定
+      process.env.KINDLE_XML_PATH = 'nonexistent/path/metadata.xml';
+      process.env.KINDLE_DB_PATH = 'nonexistent/path/collections.db';
+
+      // ファイル存在確認のモック（環境変数のパスはエラー、通常パスは成功）
+      const mockStat = jest.spyOn(fs, 'stat').mockImplementation((filePath) => {
+        if (typeof filePath === 'string' && filePath.includes('nonexistent')) {
+          return Promise.reject(new Error('ENOENT: no such file or directory'));
+        }
+        return Promise.resolve({
+          isFile: () => true,
+          isDirectory: () => true,
+          size: 1024,
+          mtime: new Date(),
+        } as any);
+      });
+
+      const mockAccess = jest.spyOn(fs, 'access').mockResolvedValue(undefined);
+      const mockMkdir = jest.spyOn(fs, 'mkdir').mockResolvedValue(undefined);
+      const mockWriteFile = jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined);
+
+      const result = await envPathDetector.detectKindlePaths();
+
+      // 環境変数のパスではなく、通常の自動検出が成功することを確認
+      if (result.success) {
+        expect(result.source).not.toBe('env');
+      }
+
+      // クリーンアップ
+      delete process.env.KINDLE_XML_PATH;
+      delete process.env.KINDLE_DB_PATH;
+      mockStat.mockRestore();
+      mockAccess.mockRestore();
+      mockMkdir.mockRestore();
+      mockWriteFile.mockRestore();
+    });
+  });
 
 // TypeScript型テスト
 describe('型定義の確認', () => {

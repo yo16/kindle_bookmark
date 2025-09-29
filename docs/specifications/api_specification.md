@@ -129,6 +129,7 @@ POST /api/sync
     "kindlePaths": {
       "metadataPath": "C:\\Users\\username\\AppData\\Local\\Amazon\\Kindle\\Cache\\KindleSyncMetadataCache.xml",
       "collectionsPath": "C:\\Users\\username\\AppData\\Local\\Amazon\\Kindle\\Cache\\db\\synced_collections.db"
+      // テスト環境: "sample_file/KindleSyncMetadataCache.xml", "sample_file/synced_collections.db"
     }
   },
   "timestamp": "2025-01-15T10:00:00.000Z"
@@ -145,6 +146,7 @@ POST /api/sync
     "details": {
       "searchedPaths": [
         "C:\\Users\\username\\AppData\\Local\\Amazon\\Kindle\\Cache\\KindleSyncMetadataCache.xml"
+        // テスト環境: "sample_file/KindleSyncMetadataCache.xml"
       ]
     }
   },

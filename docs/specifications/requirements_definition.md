@@ -40,8 +40,8 @@ Kindle Bookmark Manager
 
 ### 3.1 Kindle蔵書データ
 **ファイルパス**:
-- メタデータ: `C:\Users\{username}\AppData\Local\Amazon\Kindle\Cache\KindleSyncMetadataCache.xml`
-- コレクション情報: `C:\Users\{username}\AppData\Local\Amazon\Kindle\Cache\db\synced_collections.db`
+- メタデータ: `C:\Users\{username}\AppData\Local\Amazon\Kindle\Cache\KindleSyncMetadataCache.xml` (テスト: `sample_file/KindleSyncMetadataCache.xml`)
+- コレクション情報: `C:\Users\{username}\AppData\Local\Amazon\Kindle\Cache\db\synced_collections.db` (テスト: `sample_file/synced_collections.db`)
 
 **取得タイミング**:
 - システム起動時

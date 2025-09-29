@@ -19,7 +19,7 @@ import {
   XMLParseError,
   ParseStatistics,
   BookOriginType,
-} from '../models/book.js';
+} from '../models/book';
 import {
   KindleFileNotFoundError,
   KindleXmlParseError,
@@ -63,17 +63,20 @@ export class KindleXMLParser {
   private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB制限
   private readonly EXPECTED_KINDLE_CACHE_DIR: string;
 
-  constructor() {
-    // Windows環境のKindleキャッシュディレクトリパス
-    if (!process.env.USERPROFILE) {
+  constructor(skipPlatformCheck: boolean = false) {
+    // Windows環境チェック（テスト時はスキップ可能）
+    if (!skipPlatformCheck && !process.env.USERPROFILE) {
       throw new Error(
         'Windows環境でのみ動作します: USERPROFILE環境変数が見つかりません'
       );
     }
 
+    // テスト環境では環境変数が設定されている前提
+    const userProfile = process.env.USERPROFILE || '/mock/Users/TestUser';
+
     this.EXPECTED_KINDLE_CACHE_DIR = path.resolve(
       path.join(
-        process.env.USERPROFILE,
+        userProfile,
         'AppData',
         'Local',
         'Amazon',

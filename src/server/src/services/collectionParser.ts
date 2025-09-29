@@ -10,7 +10,7 @@ import * as path from 'path';
 
 import * as fs from 'fs/promises';
 import { Stats } from 'fs';
-import { ASIN, validateAsin } from '../models/book.js';
+import { ASIN, validateAsin } from '../models/book';
 
 // CLAUDE.mdのパフォーマンス目標値に従う
 const PERFORMANCE_TARGETS = {
@@ -113,16 +113,19 @@ export class KindleCollectionParser {
   private readonly EXPECTED_KINDLE_CACHE_DIR: string;
   private readonly DB_TIMEOUT = 5000; // 5秒タイムアウト
 
-  constructor() {
-    // Windows環境のKindleキャッシュディレクトリパス
-    if (!process.env.USERPROFILE) {
+  constructor(skipPlatformCheck: boolean = false) {
+    // Windows環境チェック（テスト時はスキップ可能）
+    if (!skipPlatformCheck && !process.env.USERPROFILE) {
       throw new Error(
         'Windows環境でのみ動作します: USERPROFILE環境変数が見つかりません'
       );
     }
 
+    // テスト環境では環境変数が設定されている前提
+    const userProfile = process.env.USERPROFILE || '/mock/Users/TestUser';
+
     this.EXPECTED_KINDLE_CACHE_DIR = path.join(
-      process.env.USERPROFILE,
+      userProfile,
       'AppData',
       'Local',
       'Amazon',
